@@ -30,19 +30,25 @@ namespace UHasseltWifi
 			System.Console.WriteLine("Loging in user: " + settings.Username);
 			System.Console.WriteLine("Http request url: " + url);
 
-
             // Prepare web request...
 			ServicePointManager.CertificatePolicy = new AcceptAllCertificatePolicy();
-            HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url.ToString());
+			try
+			{
+				HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url.ToString());
 
-            req.Method = "POST";
-            // req.ContentType="application/x-www-form-urlencoded";
-            req.ContentLength = data.Length;
-            Stream newStream = req.GetRequestStream();
+				req.Method = "POST";
+				// req.ContentType="application/x-www-form-urlencoded";
+				req.ContentLength = data.Length;
+				Stream newStream = req.GetRequestStream();
 
-            // Send the data.
-            newStream.Write(data, 0, postData.Length);
-            newStream.Close();
+				// Send the data.
+				newStream.Write(data, 0, postData.Length);
+				newStream.Close();
+			}
+			catch (System.Net.WebException)
+			{
+				System.Console.WriteLine("Connection coud not made!");
+			}
 
 			System.Console.WriteLine("End");
         }

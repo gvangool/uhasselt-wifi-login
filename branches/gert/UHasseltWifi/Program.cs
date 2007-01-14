@@ -8,68 +8,40 @@ using UHasseltWifi.Properties;
 
 namespace UHasseltWifi
 {
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            Settings settings = new Settings();
-
-            StringBuilder postData = new StringBuilder("cmd=authenticate");
-            postData.Append(@"&user=");
-            postData.Append(settings.Username);
-            postData.Append(@"&password=");
-            postData.Append(settings.Password);
-            byte[] data = (new ASCIIEncoding()).GetBytes(postData.ToString());
-
-            StringBuilder url = new StringBuilder(@"https://uhasselt-wifi.uhasselt.be/cgi-bin/login?cmd=login&mac=");
-            url.Append(settings.MacAddress);
-            url.Append(@"&ip=");
-            url.Append(GetLocalIpAddress());
-            url.Append(@"&essid=UHasselt-Public");
-
-			System.Console.WriteLine("Loging in user: " + settings.Username);
-			System.Console.WriteLine("Http request url: " + url);
-
-            // Prepare web request...
-			ServicePointManager.CertificatePolicy = new AcceptAllCertificatePolicy();
-			try
+	class Program
+	{
+		static void Main(string[] args)
+		{
+			bool debug = false;
+			for (int i = 0; i < args.Length; i++)
 			{
-				HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url.ToString());
-
-				req.Method = "POST";
-				// req.ContentType="application/x-www-form-urlencoded";
-				req.ContentLength = data.Length;
-				Stream newStream = req.GetRequestStream();
-
-				// Send the data.
-				newStream.Write(data, 0, postData.Length);
-				newStream.Close();
-			}
-			catch (System.Net.WebException)
-			{
-				System.Console.WriteLine("Connection coud not made!");
+				switch (args[i])
+				{
+					case "-debug":
+						debug = true;
+						break;
+				}
 			}
 
-			System.Console.WriteLine("End");
-        }
+			Settings settings = new Settings();
+			UHasseltWifiHttpLogin login = new UHasseltWifiHttpLogin(settings.MacAddress);
+			login.Username = settings.Username;
+			login.Password = settings.Password;
 
-        private static string GetLocalIpAddress()
-        {
-            IPAddress[] addr = Dns.GetHostAddresses(Dns.GetHostName());
-            string lowRange = "193.190.0.1";
-            string highRange = "193.190.5.254";
-            string result = null;
+			if (debug)
+			{
+				Console.WriteLine(@"Logging in user: " + login.Username);
+				if (login.Password != "")
+					Console.WriteLine(@"Using password");
+				Console.WriteLine(@"HTTP request url: " + login.URL);
+			}
+			
+			login.MakeRequest();
 
-            for (int i = 0; i < addr.Length && result == null; ++i)
-            {
-                string temp = addr[i].ToString();
-                if (temp.CompareTo(lowRange) >= 0 && temp.CompareTo(highRange) <= 0)
-                {
-                    result = temp;
-                }
-            }
-
-            return result;
-        }
-    }
+			if (debug)
+			{
+				Console.WriteLine(@"Should be logged in now");
+			}
+		}
+	}
 }

@@ -12,6 +12,8 @@ namespace UHasseltWifi
 	{
 		static void Main(string[] args)
 		{
+			Console.WriteLine(ProgramInfo());
+
 			bool debug = false;
 			for (int i = 0; i < args.Length; i++)
 			{
@@ -35,13 +37,30 @@ namespace UHasseltWifi
 					Console.WriteLine(@"Using password");
 				Console.WriteLine(@"HTTP request url: " + login.URL);
 			}
-			
-			login.MakeRequest();
 
-			if (debug)
+			try
 			{
-				Console.WriteLine(@"Should be logged in now");
+				login.MakeRequest();
+
+				if (debug)
+				{
+					Console.WriteLine(@"Should be logged in now");
+				}
 			}
+			catch (Exception e)
+			{
+				Console.WriteLine(@"Error message: {0}", e.Message);
+
+				if (debug)
+				{
+					Console.WriteLine(e.StackTrace);
+				}
+			}
+		}
+
+		private static string ProgramInfo()
+		{
+			return System.Reflection.Assembly.GetCallingAssembly().GetName().Name + @" v" + System.Reflection.Assembly.GetCallingAssembly().GetName().Version;
 		}
 	}
 }

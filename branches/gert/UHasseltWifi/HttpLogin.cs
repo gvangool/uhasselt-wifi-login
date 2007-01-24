@@ -106,20 +106,28 @@ namespace UHasseltWifi
 		{
 			SetData();
 			// convert post data to bytes
-			byte[] data = (new ASCIIEncoding()).GetBytes(PostData.ToString());
+			byte[] data = null;
+			if (PostData != null)
+				data = (new ASCIIEncoding()).GetBytes(PostData);
 
 			ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(AcceptAllCertificates);
 			HttpWebRequest req = (HttpWebRequest)WebRequest.Create(URL);
 			req.Method = Method;
 			req.ContentLength = data.Length;
+			req.UserAgent = @"UHasselt WiFi Login v" + System.Reflection.Assembly.GetCallingAssembly().GetName().Version;
 
-			if (Method == @"POST")
+			if (Method == @"POST" && data != null)
 			{
 				Stream newStream = req.GetRequestStream();
 				// Send the data.
 				newStream.Write(data, 0, PostData.Length);
 				newStream.Close();
 			}
+
+			Console.WriteLine(req.GetResponse().ContentType);
+			int dataByte = -1;
+			while ((dataByte = req.GetResponse().GetResponseStream().ReadByte()) != -1)
+				Console.Write("" + (char)dataByte);
 		}
 
 		/// <summary>Intended to use as the last place to set POST data, will be called before making the request</summary>

@@ -21,8 +21,10 @@ namespace UHasseltWifi
             postData.Append(settings.Password);
             byte[] data = (new ASCIIEncoding()).GetBytes(postData.ToString());
 
-            StringBuilder url = new StringBuilder(@"https://uhasselt-wifi.uhasselt.be/cgi-bin/login?cmd=login&mac=");
-            url.Append(settings.MacAddress);
+            // https://securelogin.arubanetworks.com/cgi-bin/login?cmd=login&mac=00:1f:e1:83:b7:d6&ip=10.5.253.216&essid=UHasselt-Public
+            StringBuilder url = new StringBuilder(@"https://securelogin.arubanetworks.com/cgi-bin/login?cmd=login&mac");
+            // url.Append(settings.MacAddress);
+            url.Append(GetWirelessMAC());
             url.Append(@"&ip=");
             url.Append(GetLocalIpAddress());
             url.Append(@"&essid=UHasselt-Public");
@@ -31,7 +33,8 @@ namespace UHasseltWifi
 			System.Console.WriteLine("Http request url: " + url);
 
             // Prepare web request...
-			ServicePointManager.CertificatePolicy = new AcceptAllCertificatePolicy();
+			// ServicePointManager.CertificatePolicy = new AcceptAllCertificatePolicy();
+            System.Net.ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
 			try
 			{
 				HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url.ToString());
@@ -56,8 +59,8 @@ namespace UHasseltWifi
         private static string GetLocalIpAddress()
         {
             IPAddress[] addr = Dns.GetHostAddresses(Dns.GetHostName());
-            string lowRange = "193.190.0.1";
-            string highRange = "193.190.5.254";
+            string lowRange = "10.5.0.0";
+            string highRange = "10.5.255.255";
             string result = null;
 
             for (int i = 0; i < addr.Length && result == null; ++i)
@@ -70,6 +73,22 @@ namespace UHasseltWifi
             }
 
             return result;
+        }
+
+        private static string GetWirelessMAC()
+        {
+            ManagementClass mc = new ManagementClass("Win32_NetworkAdapterConfiguration");
+            ManagementObjectCollection moc = mc.GetInstances();
+            string MACAddress = String.Empty;
+            foreach (ManagementObject mo in moc)
+            {
+                if (MACAddress == String.Empty) // only return MAC Address from first card
+                {
+                    if ((bool)mo["IPEnabled"] == true) MACAddress = mo["MacAddress"].ToString();
+                }
+                mo.Dispose();
+            }
+            return MACAddress;
         }
     }
 }

@@ -3,13 +3,10 @@
   <Profiles />
   <Settings>
     <Setting Name="Username" Type="System.String" Scope="User">
-      <Value Profile="(Default)">studentenNummer</Value>
+      <Value Profile="(Default)" />
     </Setting>
     <Setting Name="Password" Type="System.String" Scope="User">
-      <Value Profile="(Default)">password</Value>
-    </Setting>
-    <Setting Name="MacAddress" Type="System.String" Scope="User">
-      <Value Profile="(Default)">00:00:00:00:00:00</Value>
+      <Value Profile="(Default)" />
     </Setting>
   </Settings>
 </SettingsFile>

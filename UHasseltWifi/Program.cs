@@ -5,6 +5,7 @@ using System.Net;
 using System.Text;
 using System.Management;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 using UHasseltWiFi.Properties;
 
@@ -14,6 +15,13 @@ namespace UHasseltWiFi
 	{
 		static void Main(string[] args)
 		{
+            //* for testing purposes, will be removed later --sv
+            String smac, sip;
+            GetHostInfo_experimental(out sip, out smac);
+            Console.WriteLine("MAC: {0}\nIP: {1}", smac, sip);
+            Environment.Exit(-1);
+            //*/
+            
             if (Settings.Default.Username.Equals("") || Settings.Default.Password.Equals(""))
             {
                 System.Console.WriteLine("It looks you run this for the first time.");
@@ -110,6 +118,39 @@ namespace UHasseltWiFi
 
 			return "";
 		}
+
+        // this function isn't tested
+        // I'm not sure if it will work.
+        // But hey, you can't know untill you test it :)
+        private static void GetHostInfo_experimental(out String ip, out String mac)
+        {
+            ip = mac = "";
+            try
+            { 
+                //HttpWebRequest req = (HttpWebRequest)WebRequest.Create("http://www.google.com");
+                HttpWebRequest req = (HttpWebRequest)WebRequest.Create("http://lumumba.uhasselt.be/~sv/test_redirect/redirect.php");
+                HttpWebResponse response = (HttpWebResponse)req.GetResponse();
+                Uri uri = response.ResponseUri;
+                Debug.WriteLine(uri.OriginalString);
+
+                Regex mac_filter = new Regex("[?|&]mac=([^&]*)&?", RegexOptions.Compiled);
+                MatchCollection mac_matches = mac_filter.Matches(uri.Query);
+                if (mac_matches.Count > 0)
+                {
+                    mac = mac_matches[0].Groups[1].Value;
+                }
+                Regex ip_filter = new Regex("[?|&]ip=([^&]*)&?", RegexOptions.Compiled);
+                MatchCollection ip_matches = ip_filter.Matches(uri.Query);
+                if (ip_matches.Count > 0)
+                {
+                    ip = ip_matches[0].Groups[1].Value;
+                }
+            }
+            catch (System.Net.WebException)
+            {
+                System.Console.WriteLine("Connection could not be made!");
+            }
+        }
 
 		private static string GetWirelessMAC()
 		{

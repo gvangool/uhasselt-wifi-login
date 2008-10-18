@@ -7,8 +7,8 @@
     <ProjectGuid>{506D6C22-FCEE-4807-A103-459BF02288CF}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>UHasseltWifi</RootNamespace>
-    <AssemblyName>UHasseltWifi</AssemblyName>
+    <RootNamespace>UHasseltWiFi</RootNamespace>
+    <AssemblyName>UHasseltWiFi</AssemblyName>
     <ApplicationIcon>favicon.ico</ApplicationIcon>
     <FileUpgradeFlags>
     </FileUpgradeFlags>

@@ -6,9 +6,9 @@ using System.Text;
 using System.Management;
 using System.Diagnostics;
 
-using UHasseltWifi.Properties;
+using UHasseltWiFi.Properties;
 
-namespace UHasseltWifi
+namespace UHasseltWiFi
 {
 	class Program
 	{
@@ -26,7 +26,6 @@ namespace UHasseltWifi
                 changeSettings();
             }
 
-
             StringBuilder postData = new StringBuilder("cmd=authenticate");
 			postData.Append(@"&user=");
 			postData.Append(Settings.Default.Username);
@@ -36,10 +35,24 @@ namespace UHasseltWifi
 
 			// https://securelogin.arubanetworks.com/cgi-bin/login?cmd=login&mac=00:1f:e1:83:b7:d6&ip=10.5.253.216&essid=UHasselt-Public
 			StringBuilder url = new StringBuilder(@"https://securelogin.arubanetworks.com/cgi-bin/login?cmd=login&mac");
-			// url.Append(settings.MacAddress);
-			url.Append(GetWirelessMAC());
-			url.Append(@"&ip=");
-			url.Append(GetLocalIpAddress());
+            String error = "Error while searching for XXX address. " +
+                    "Make sure you are connected to an access point.";
+            String mac = GetWirelessMAC();
+            if (mac == "")
+            {
+                System.Console.WriteLine(error.Replace("XXX", "MAC"));
+                Environment.Exit(-1);
+            }
+            url.Append(mac);
+            
+            url.Append(@"&ip=");
+            String ip = GetLocalIpAddress();
+            if (ip == "")
+            {
+                System.Console.WriteLine(error.Replace("XXX", "IP"));
+                Environment.Exit(-1);
+            }
+            url.Append(ip);
 			url.Append(@"&essid=UHasselt-Public");
 
 			System.Console.WriteLine("Logging in user: " + Settings.Default.Username);
@@ -64,7 +77,21 @@ namespace UHasseltWifi
 			catch (System.Net.WebException)
 			{
 				System.Console.WriteLine("Connection could not be made!");
+                Environment.Exit(-1);
 			}
+
+            // test if we can reach Google
+            try
+            {
+                HttpWebRequest req = (HttpWebRequest)WebRequest.Create("http://www.google.com/");
+                req.GetResponse();
+            }
+            catch (System.Net.WebException)
+            {
+                System.Console.WriteLine("Something went wrong, I couldn't reach Google. " +
+                    "Check ip ({0}) and MAC ({1}) address.", ip, mac);
+                Environment.Exit(-1);
+            }
 
 			System.Console.WriteLine("End");
 		}

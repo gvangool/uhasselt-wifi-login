@@ -42,7 +42,7 @@ namespace UHasseltWifi
 			url.Append(GetLocalIpAddress());
 			url.Append(@"&essid=UHasselt-Public");
 
-			System.Console.WriteLine("Loging in user: " + Settings.Default.Username);
+			System.Console.WriteLine("Logging in user: " + Settings.Default.Username);
 			System.Console.WriteLine("Http request url: " + url);
 
 			// Prepare web request...
@@ -63,7 +63,7 @@ namespace UHasseltWifi
 			}
 			catch (System.Net.WebException)
 			{
-				System.Console.WriteLine("Connection coud not made!");
+				System.Console.WriteLine("Connection could not be made!");
 			}
 
 			System.Console.WriteLine("End");
@@ -115,11 +115,11 @@ namespace UHasseltWifi
         {
             System.Console.Write("Your username: ");
             Settings.Default.Username = System.Console.ReadLine();
-            System.Console.Write("Your Paswoord: ");
+            System.Console.Write("Your password: ");
             Settings.Default.Password = System.Console.ReadLine();
             Settings.Default.Save();
 
-            System.Console.WriteLine("You can change your settings at any time by" +
+            System.Console.WriteLine("You can change your settings at any time by " +
                                     "running this program with the reset attribute.");
         }
 	}

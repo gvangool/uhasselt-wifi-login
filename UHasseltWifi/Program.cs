@@ -14,14 +14,7 @@ namespace UHasseltWiFi
 	class Program
 	{
 		static void Main(string[] args)
-		{
-            //* for testing purposes, will be removed later --sv
-            String smac, sip;
-            GetHostInfo_experimental(out sip, out smac);
-            Console.WriteLine("MAC: {0}\nIP: {1}", smac, sip);
-            Environment.Exit(-1);
-            //*/
-            
+		{            
             if (Settings.Default.Username.Equals("") || Settings.Default.Password.Equals(""))
             {
                 System.Console.WriteLine("It looks you run this for the first time.");
@@ -42,10 +35,12 @@ namespace UHasseltWiFi
 			byte[] data = (new ASCIIEncoding()).GetBytes(postData.ToString());
 
 			// https://securelogin.arubanetworks.com/cgi-bin/login?cmd=login&mac=00:1f:e1:83:b7:d6&ip=10.5.253.216&essid=UHasselt-Public
-			StringBuilder url = new StringBuilder(@"https://securelogin.arubanetworks.com/cgi-bin/login?cmd=login&mac");
+			StringBuilder url = new StringBuilder(@"https://securelogin.arubanetworks.com/cgi-bin/login?cmd=login&mac=");
             String error = "Error while searching for XXX address. " +
                     "Make sure you are connected to an access point.";
-            String mac = GetWirelessMAC();
+            String ip, mac;
+            GetHostInfo(out ip, out mac);
+            //String mac = GetWirelessMAC();
             if (mac == "")
             {
                 System.Console.WriteLine(error.Replace("XXX", "MAC"));
@@ -54,7 +49,7 @@ namespace UHasseltWiFi
             url.Append(mac);
             
             url.Append(@"&ip=");
-            String ip = GetLocalIpAddress();
+            //String ip = GetLocalIpAddress();
             if (ip == "")
             {
                 System.Console.WriteLine(error.Replace("XXX", "IP"));
@@ -91,13 +86,19 @@ namespace UHasseltWiFi
             // test if we can reach Google
             try
             {
-                HttpWebRequest req = (HttpWebRequest)WebRequest.Create("http://www.google.com/");
-                req.GetResponse();
+                String testurl = "http://www.google.com/intl/en/";
+                HttpWebRequest req = (HttpWebRequest)WebRequest.Create(testurl);
+                HttpWebResponse response = (HttpWebResponse)req.GetResponse();
+                if (testurl != response.ResponseUri.OriginalString)
+                {
+                    System.Console.WriteLine("Something went wrong, I couldn't reach Google. " +
+                       "Check ip ({0}) and MAC ({1}) address.", ip, mac);
+                    Environment.Exit(-1);
+                }
             }
             catch (System.Net.WebException)
             {
-                System.Console.WriteLine("Something went wrong, I couldn't reach Google. " +
-                    "Check ip ({0}) and MAC ({1}) address.", ip, mac);
+                System.Console.WriteLine("Connection could not be made!");
                 Environment.Exit(-1);
             }
 
@@ -119,16 +120,12 @@ namespace UHasseltWiFi
 			return "";
 		}
 
-        // this function isn't tested
-        // I'm not sure if it will work.
-        // But hey, you can't know untill you test it :)
-        private static void GetHostInfo_experimental(out String ip, out String mac)
+        private static void GetHostInfo(out String ip, out String mac)
         {
             ip = mac = "";
             try
-            { 
-                //HttpWebRequest req = (HttpWebRequest)WebRequest.Create("http://www.google.com");
-                HttpWebRequest req = (HttpWebRequest)WebRequest.Create("http://lumumba.uhasselt.be/~sv/test_redirect/redirect.php");
+            {
+                HttpWebRequest req = (HttpWebRequest)WebRequest.Create("http://www.google.com/intl/en/");
                 HttpWebResponse response = (HttpWebResponse)req.GetResponse();
                 Uri uri = response.ResponseUri;
                 Debug.WriteLine(uri.OriginalString);

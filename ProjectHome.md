@@ -1,0 +1,1 @@
+[UHasselt](http://www.uhasselt.be) WiFi login will be used to automated the login process on the new wifi network of the UH
